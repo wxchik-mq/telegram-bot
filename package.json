@@ -1,0 +1,39 @@
+{
+  "name": "telegram-bot-backend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "prisma generate && prisma migrate deploy && next build",
+    "start": "next start",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy"
+  },
+  "dependencies": {
+    "@langchain/community": "^0.3.33",
+    "@langchain/core": "^0.3.79",
+    "@langchain/google-genai": "^0.1.12",
+    "@prisma/client": "^6.18.0",
+    "cld3-asm": "^4.0.0",
+    "franc": "^6.2.0",
+    "langchain": "^0.2.17",
+    "mammoth": "^1.7.2",
+    "next": "14.2.3",
+    "pdf-parse": "^1.1.1",
+    "prisma": "^6.18.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.8",
+    "@types/pdf-parse": "^1.1.5",
+    "@types/react": "19.2.2",
+    "typescript": "5.9.3"
+  },
+  "description": "This project provides a minimal Next.js backend that can receive updates from Telegram and send replies back through the Telegram Bot API.",
+  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

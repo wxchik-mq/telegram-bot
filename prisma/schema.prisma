@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  telegramId   BigInt   @unique
+  isBot        Boolean
+  firstName    String?
+  lastName     String?
+  username     String?
+  languageCode String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  messages Message[]
+
+  @@map("users")
+}
+
+model Chat {
+  id         Int      @id @default(autoincrement())
+  telegramId BigInt   @unique
+  type       String
+  title      String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  messages Message[]
+
+  @@map("chats")
+}
+
+model Message {
+  id        Int         @id @default(autoincrement())
+  chatId    Int
+  userId    Int
+  role      String
+  content   String
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chat Chat @relation(fields: [chatId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([chatId])
+  @@map("messages")
+}
+
+model Document {
+  id           Int      @id @default(autoincrement())
+  source       String?
+  title        String?
+  documentType String
+  metadata     Json
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  chunks KnowledgeBase[]
+
+  @@map("documents")
+}
+
+model KnowledgeBase {
+  id            Int      @id @default(autoincrement())
+  documentId    Int
+  chunkIndex    Int
+  text          String
+  embedding     Unsupported("vector(3072)")
+  metadata      Json
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([documentId, chunkIndex])
+  @@map("knowledge_base")
+}
