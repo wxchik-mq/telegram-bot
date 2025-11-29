@@ -5,7 +5,6 @@ import {
   updateKnowledgeBaseEntry,
   deleteDocumentEntry,
 } from "../../../../lib/knowledgeBase";
-import { deleteAllDocumentEntriesTest } from "../../../../lib/knowledgeBase/manager";
 
 // Prisma only works on the Node.js runtime, so make sure this never runs on edge.
 export const runtime = "nodejs";
@@ -53,10 +52,6 @@ export async function PUT(request: NextRequest, context: { params: { id: string 
 export async function DELETE(request: NextRequest, context: { params: { id: string } }) {
   const id = Number(context.params?.id);
 
-  if (id == -7) {
-    await deleteAllDocumentEntriesTest();
-    return NextResponse.json({ success: true });
-  }
   if (!Number.isInteger(id) || id <= 0) {
     return NextResponse.json({ error: "A valid numeric id is required" }, { status: 400 });
   }
