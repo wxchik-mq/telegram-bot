@@ -6,6 +6,12 @@ const USERNAME = process.env.USERNAME;
 const PASSWORD = process.env.PASSWORD;
 
 export function middleware(request: NextRequest) {
+    // Skip authentication for Telegram webhook
+    const pathname = request.nextUrl.pathname;
+    if (pathname.startsWith('/api/telegram')) {
+        return NextResponse.next();
+    }
+
     // Get the authorization header
     const authHeader = request.headers.get('authorization');
 
@@ -39,7 +45,6 @@ export function middleware(request: NextRequest) {
 }
 
 // Configure which routes to protect
-// This will protect all routes except the Telegram webhook
 export const config = {
     matcher: [
         /*
@@ -47,8 +52,8 @@ export const config = {
          * - _next/static (static files)
          * - _next/image (image optimization files)
          * - favicon.ico (favicon file)
-         * - api/telegram (Telegram webhook endpoint)
+         * Note: /api/telegram is excluded in the middleware function itself
          */
-        '/((?!_next/static|_next/image|favicon.ico|api/telegram).*)',
+        '/((?!_next/static|_next/image|favicon.ico).*)',
     ],
 };
