@@ -39,7 +39,7 @@ interface DocumentEmbeddingInput {
   metadata?: any;
 }
 
-export async function createKnowledgeBaseEntries(
+export async function createDocumentAndChunks(
   documentType: string,
   data: any,
 ) {
@@ -69,6 +69,7 @@ export async function createKnowledgeBaseEntries(
           title: parsedPdf.title,
           pageCount: parsedPdf.pageCount,
           info: parsedPdf.info,
+          rawText: parsedPdf.text,
         },
       })
       documents = [documentDao];
@@ -89,6 +90,7 @@ export async function createKnowledgeBaseEntries(
           fileName: parsedDocx.fileName,
           title: parsedDocx.title,
           messages: parsedDocx.messages,
+          rawText: parsedDocx.text,
         },
       })
       documents = [documentDao];
@@ -108,6 +110,7 @@ export async function createKnowledgeBaseEntries(
           documentType: "txt",
           fileName: parsedTxt.fileName,
           title: parsedTxt.title ?? parsedTxt.fileName,
+          rawText: parsedTxt.text,
         },
       })
       documents = [documentDao];
@@ -128,15 +131,59 @@ export async function createKnowledgeBaseEntries(
   });
 }
 
+export async function listDocuments(documentType?: string) {
+  return await prisma.document.findMany({
+    where: {
+      deletedAt: null,
+      documentType: documentType || undefined,
+    },
+    orderBy: {
+      updatedAt: "desc",
+    }
+  });
+}
+
+export async function updateDocumentAndChunksById(id: number, documentType: string, data: any) {
+  const document = await findDocumentById(id);
+  if (!document) {
+    throw new Error(`Document with id ${id} not found`);
+  }
+  if (document.documentType !== documentType) {
+    throw new Error(`Document with id ${id} has a different document type`);
+  }
+  await softDeleteDocumentAndChunksById(id);
+  await createDocumentAndChunks(documentType, data);
+}
+export async function findDocumentById(id: number) {
+  return await prisma.document.findUnique({
+    where: { id, deletedAt: null },
+  });
+}
+
+export async function softDeleteDocumentAndChunksById(id: number) {
+  const now = new Date();
+  await prisma.$transaction([
+    prisma.document.update({
+      where: { id },
+      data: { deletedAt: now },
+    }),
+    prisma.knowledgeBase.updateMany({
+      where: { documentId: id },
+      data: { deletedAt: now },
+    }),
+  ]);
+}
+
+// This is likely not going to be used anymore
 export async function listKnowledgeBaseEntries(documentType?: string): Promise<KnowledgeBaseChunksResponseDto[]> {
   const entries = await prisma.knowledgeBase.findMany({
-    where: documentType
-      ? {
-        document: {
-          documentType,
-        },
-      }
-      : undefined,
+    where: {
+      deletedAt: null,
+      document: {
+        deletedAt: null,
+        documentType: documentType || undefined,
+      },
+    },
     orderBy: {
       updatedAt: "desc",
     },
@@ -293,6 +340,8 @@ export async function retrieveRelevantKnowledge(query: string, limit = 3, thresh
     FROM "knowledge_base" kb
     INNER JOIN "documents" d ON d."id" = kb."documentId"
     WHERE (kb."embedding" <=> ${vectorLiteral}::vector) < ${threshold}
+      AND kb."deletedAt" IS NULL
+      AND d."deletedAt" IS NULL
     ORDER BY similarity
     LIMIT ${limit}
   `);

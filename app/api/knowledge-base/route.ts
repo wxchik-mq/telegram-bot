@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createKnowledgeBaseEntries, listKnowledgeBaseEntries } from "../../../lib/knowledgeBase";
+import { createDocumentAndChunks, listKnowledgeBaseEntries } from "../../../lib/knowledgeBase";
+
+/* 
+we will be moving over to api/document, these knowledge-base APIs will be deprecated
+*/
 
 // Prisma only works on the Node.js runtime, so make sure this never runs on edge.
 export const runtime = "nodejs";
@@ -61,7 +65,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    await createKnowledgeBaseEntries(documentType, data);
+    await createDocumentAndChunks(documentType, data);
     return NextResponse.json({ status: "ok" });
   } catch (error) {
     console.error("Knowledge base POST failed", error);
