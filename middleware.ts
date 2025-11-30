@@ -39,7 +39,7 @@ export function middleware(request: NextRequest) {
 }
 
 // Configure which routes to protect
-// This will protect all routes
+// This will protect all routes except the Telegram webhook
 export const config = {
     matcher: [
         /*
@@ -47,7 +47,8 @@ export const config = {
          * - _next/static (static files)
          * - _next/image (image optimization files)
          * - favicon.ico (favicon file)
+         * - api/telegram (Telegram webhook endpoint)
          */
-        '/((?!_next/static|_next/image|favicon.ico).*)',
+        '/((?!_next/static|_next/image|favicon.ico|api/telegram).*)',
     ],
 };
