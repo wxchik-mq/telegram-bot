@@ -8,6 +8,8 @@ import AddDocumentModal from "./_components/AddDocumentModal";
 import ViewModal from "./_components/ViewModal";
 import EditModal from "./_components/EditModal";
 
+import DeleteConfirmationModal from "./_components/DeleteConfirmationModal";
+
 interface Document {
     id: number;
     documentType: string;
@@ -30,6 +32,11 @@ export default function KnowledgeBasePage() {
     const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+    // Delete Modal State
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [documentToDelete, setDocumentToDelete] = useState<Document | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const fetchDocuments = async (documentType?: string) => {
         setIsLoading(true);
@@ -97,17 +104,32 @@ export default function KnowledgeBasePage() {
         }
     };
 
-    const handleDelete = async (id: number) => {
+    const confirmDelete = async () => {
+        if (!documentToDelete) return;
+
+        setIsDeleting(true);
         try {
-            const response = await fetch(`/api/document/${id}`, {
+            const response = await fetch(`/api/document/${documentToDelete.id}`, {
                 method: "DELETE",
             });
 
             if (!response.ok) throw new Error("Delete failed");
             await fetchDocuments(filterType === "all" ? undefined : filterType);
+            setIsDeleteModalOpen(false);
+            setDocumentToDelete(null);
         } catch (error) {
             console.error("Delete error:", error);
             alert("Failed to delete document");
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
+    const handleDeleteClick = (id: number) => {
+        const doc = documents.find((d) => d.id === id);
+        if (doc) {
+            setDocumentToDelete(doc);
+            setIsDeleteModalOpen(true);
         }
     };
 
@@ -236,7 +258,7 @@ export default function KnowledgeBasePage() {
                         ) : (
                             <DocumentList
                                 documents={filteredDocuments}
-                                onDelete={handleDelete}
+                                onDelete={handleDeleteClick}
                                 onView={handleView}
                                 onEdit={handleEdit}
                             />
@@ -264,6 +286,14 @@ export default function KnowledgeBasePage() {
                 document={selectedDocument}
                 onClose={() => setIsEditModalOpen(false)}
                 onSubmit={handleUpdate}
+            />
+
+            <DeleteConfirmationModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={confirmDelete}
+                title={documentToDelete?.title || "this document"}
+                isDeleting={isDeleting}
             />
         </div>
     );

@@ -116,20 +116,9 @@ export default function DocumentList({ documents, onDelete, onView, onEdit }: Do
                                 </svg>
                             </button>
                             <button
-                                onClick={() => {
-                                    if (deletingId === doc.id) {
-                                        onDelete(doc.id);
-                                        setDeletingId(null);
-                                    } else {
-                                        setDeletingId(doc.id);
-                                        setTimeout(() => setDeletingId(null), 3000);
-                                    }
-                                }}
-                                className={`p-2 rounded-lg transition-colors ${deletingId === doc.id
-                                    ? "bg-red-500 text-white hover:bg-red-600"
-                                    : "text-gray-400 hover:text-red-600 hover:bg-red-50 opacity-0 group-hover:opacity-100"
-                                    }`}
-                                title={deletingId === doc.id ? "Click again to confirm" : "Delete"}
+                                onClick={() => onDelete(doc.id)}
+                                className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100"
+                                title="Delete"
                             >
                                 <Trash2 className="w-4 h-4" />
                             </button>
