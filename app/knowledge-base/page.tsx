@@ -38,6 +38,9 @@ export default function KnowledgeBasePage() {
     const [documentToDelete, setDocumentToDelete] = useState<Document | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
+    // Sidebar State
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
     const fetchDocuments = async (documentType?: string) => {
         setIsLoading(true);
         try {
@@ -188,7 +191,10 @@ export default function KnowledgeBasePage() {
 
     return (
         <div className="flex min-h-screen bg-gray-50">
-            <Sidebar />
+            <Sidebar
+                isCollapsed={isSidebarCollapsed}
+                onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+            />
 
             <main className="flex-1">
                 {/* Top Section */}
