@@ -1,6 +1,6 @@
 "use client";
 
-import { Calendar, Trash2 } from "lucide-react";
+import { Calendar, Trash2, FileText, FileType, FileCode, HelpCircle, File } from "lucide-react";
 import { useState } from "react";
 
 interface Document {
@@ -21,17 +21,33 @@ export default function DocumentList({ documents, onDelete, onView, onEdit }: Do
     const [deletingId, setDeletingId] = useState<number | null>(null);
 
     const getDocumentIcon = (type: string) => {
+        const iconClass = "w-6 h-6";
         switch (type.toLowerCase()) {
             case "pdf":
-                return "📄";
+                return <File className={`${iconClass} text-blue-500`} />;
             case "docx":
-                return "📝";
+                return <FileText className={`${iconClass} text-green-500`} />;
             case "txt":
-                return "📃";
+                return <FileType className={`${iconClass} text-gray-500`} />;
             case "faq":
-                return "❓";
+                return <HelpCircle className={`${iconClass} text-purple-500`} />;
             default:
-                return "📋";
+                return <File className={`${iconClass} text-red-500`} />;
+        }
+    };
+
+    const getDocumentTypeColor = (type: string) => {
+        switch (type.toLowerCase()) {
+            case "pdf":
+                return "bg-blue-100 text-blue-800";
+            case "docx":
+                return "bg-green-100 text-green-800";
+            case "txt":
+                return "bg-gray-100 text-gray-800";
+            case "faq":
+                return "bg-purple-100 text-purple-800";
+            default:
+                return "bg-red-100 text-red-800";
         }
     };
 
@@ -53,7 +69,7 @@ export default function DocumentList({ documents, onDelete, onView, onEdit }: Do
     }
 
     return (
-        <div className="space-y-3">
+        <div className="space-y-3 max-h-[calc(100vh-200px)] overflow-y-auto pr-2">
             {documents.map((doc) => (
                 <div
                     key={doc.id}
@@ -62,10 +78,10 @@ export default function DocumentList({ documents, onDelete, onView, onEdit }: Do
                 >
                     <div className="flex items-start justify-between">
                         <div className="flex items-start space-x-3 flex-1">
-                            <span className="text-2xl">{getDocumentIcon(doc.documentType)}</span>
+                            <div className="flex items-center justify-center">{getDocumentIcon(doc.documentType)}</div>
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center space-x-2 mb-1">
-                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
+                                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getDocumentTypeColor(doc.documentType)}`}>
                                         {doc.documentType.toUpperCase()}
                                     </span>
                                 </div>
